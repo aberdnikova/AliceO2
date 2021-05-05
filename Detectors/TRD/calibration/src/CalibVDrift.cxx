@@ -11,6 +11,10 @@
 /// \file   CalibVDrift.cxx
 /// \author Ole Schmidt, ole.schmidt@cern.ch
 
+// https://github.com/AliceO2Group/AliceO2/blob/dev/Detectors/TRD/base/include/TRDBase/ChamberCalibrations.h
+// http://ccdb-test.cern.ch:8080/browse/TRD/Calib?report=true
+// http://ccdb-test.cern.ch:8080/browse/TRD_test/ChamberCalibrations
+
 #include "TFile.h"
 #include "TH2F.h"
 #include "TGraphErrors.h"
@@ -23,6 +27,7 @@
 //#include "AliTRDCalPad.h"
 #include "TRDBase/LocalVDrift.h"
 #include "TRDBase/ChamberCalibrations.h"
+#include "TRDBase/CalVdriftExB.h"
 #include "CCDB/BasicCCDBManager.h"
 
 
@@ -159,49 +164,55 @@ void CalibVDrift::process()
     LOG(info) << "Started processing for vDrift calibration";
 
 
-#if 1
+
     //------------------------------------------
     // Connect to the CCDB
     // Read
     printf("Connect to CCDB for reading \n");
     Long64_t timestamp = 265501;
+#if 0
     LocalVDrift* o2localvdrift_read;
     ChamberCalibrations* o2chambercalibrations_read;
+    CalVdriftExB*        o2CalVdriftExB_read;
     //auto& ccdbmgr = o2::ccdb::BasicCCDBManager::instance();
     BasicCCDBManager ccdbmgr = o2::ccdb::BasicCCDBManager::instance();
     ccdbmgr.setTimestamp(timestamp);
     //std::string fulltablename = "TRD_test/LocalVDrift/" + tablename;
-    std::string fulltablename       = "TRD_test/LocalVDrift";
-    std::string fulltablename_calib = "TRD_test/ChamberCalibrations";
+    std::string fulltablename              = "TRD_test/LocalVDrift";
+    std::string fulltablename_calib        = "TRD_test/ChamberCalibrations";
+    std::string fulltablename_CalVdriftExB = "TRD_test/CalVdriftExB";
     o2localvdrift_read         = ccdbmgr.get<o2::trd::LocalVDrift>(fulltablename);
     o2chambercalibrations_read = ccdbmgr.get<o2::trd::ChamberCalibrations>(fulltablename_calib);
+    o2CalVdriftExB_read        = ccdbmgr.get<o2::trd::CalVdriftExB>(fulltablename_CalVdriftExB);
     Double_t value = o2localvdrift_read ->getPadValue(0,0,0); // PadCalibrations.h
-    printf("value: %4.3f \n",value);
+    //printf("value: %4.3f \n",value);
 
     for(Int_t i_det = 0; i_det < 540; i_det++)
     {
         //Float_t gain = o2chambercalibrations_read->getGainFactor(i_det);
         Float_t vdrift = o2chambercalibrations_read->getVDrift(i_det);
-        printf("i_det: %d, vdrift: %4.3f \n",i_det,vdrift);
+        //printf("i_det: %d, vdrift: %4.3f \n",i_det,vdrift);
     }
+#endif
 
+#if 1
     //Connect to CCDB
     //
-
-    /*
     printf("Connect to CCDB for writing \n");
     o2::ccdb::CcdbApi ccdb;
     map<string, string> metadata;               // do we want to store any meta data?
     ccdb.init("http://ccdb-test.cern.ch:8080"); // or http://localhost:8080 for a local installation
 
     //auto o2localvdrift = new o2::trd::LocalVDrift();
-    LocalVDrift* o2localvdrift_write = new o2::trd::LocalVDrift();
+    LocalVDrift*         o2localvdrift_write   = new o2::trd::LocalVDrift();
     ChamberCalibrations* o2chambercalibrations = new o2::trd::ChamberCalibrations();
+    CalVdriftExB*        o2CalVdriftExB        = new o2::trd::CalVdriftExB();
     Int_t j_ROC = 0;
     for(Int_t i_det = 0; i_det < 540; i_det++)
     {
-        o2localvdrift_write->setPadValue(i_det, j_ROC, 1.56);
-        o2chambercalibrations->setVDrift(i_det, 1.82);
+        o2localvdrift_write   ->setPadValue(i_det, j_ROC, 1.56);
+        o2chambercalibrations ->setVDrift(i_det, 1.82);
+        o2CalVdriftExB        ->setVDrift(i_det, 1.42);
     }
 
     // Write
@@ -209,7 +220,7 @@ void CalibVDrift::process()
     Int_t Run = timestamp;
     ccdb.storeAsTFileAny(o2localvdrift_write, "TRD_test/LocalVDrift", metadata, Run, Run + 1);
     ccdb.storeAsTFileAny(o2chambercalibrations, "TRD_test/ChamberCalibrations", metadata, Run, Run + 1);
-    */
+    ccdb.storeAsTFileAny(o2CalVdriftExB, "TRD_test/CalVdriftExB", metadata, Run, Run + 1);
     //------------------------------------------
 #endif
 
@@ -219,12 +230,12 @@ void CalibVDrift::process()
     std::array<double, constants::MAXCHAMBER> arr_LA_fit;
     std::array<double, constants::MAXCHAMBER> arr_vD_fit;
 
-    auto input_data = TFile::Open("/home/ceres/berdnikova/TRD-Run3-Calibration/Data/TRD_Calib_on_trkl.root");
+    //auto input_data = TFile::Open("/home/ceres/berdnikova/TRD-Run3-Calibration/Data/TRD_Calib_on_trkl.root");
 
-    for (int iDet = 0; iDet < constants::MAXCHAMBER; ++iDet)
-    {
-        vec_tp_Delta_vs_impact_circle[iDet] = (TProfile*)input_data->Get(Form("Delta_impact_circle/vec_th1d_Delta_vs_impact_circle_%d",iDet));
-    }
+    //for (int iDet = 0; iDet < constants::MAXCHAMBER; ++iDet)
+    //{
+    //    vec_tp_Delta_vs_impact_circle[iDet] = (TProfile*)input_data->Get(Form("Delta_impact_circle/vec_th1d_Delta_vs_impact_circle_%d",iDet));
+    //}
 
     std::array<std::unique_ptr<TGraphErrors>, constants::MAXCHAMBER> arr_tg_angleDiff;
 
@@ -240,20 +251,22 @@ void CalibVDrift::process()
         for (int iBin = 0; iBin < constants::NBINSANGLEDIFF; ++iBin) { // note: iBin = constants::NBINSANGLEDIFF - 1 is under-/overflow bin
 
         //for (int iBin = 5; iBin < 20; ++iBin) {
-        /* //read real values - enable later
+         //read real values - enable later
             short nEntries = mAngleDiffCounters[iDet * constants::NBINSANGLEDIFF + iBin];
             float angleDiffSum = mAngleDiffSums[iDet * constants::NBINSANGLEDIFF + iBin];
             if (nEntries > 0)
             {
                 LOGF(INFO, "Found %i entrie(s) in chamber %i, bin %i. Average angular deviation: %f", nEntries, iDet, iBin, angleDiffSum / nEntries);
-                arr_tg_angleDiff[iDet] ->SetPoint(iBin,iBin,angleDiffSum/nEntries);
-                LOGF(INFO, "Point written: bin %i, angdiff: %f",iBin, arr_tg_angleDiff[iDet] ->GetPointY(iBin));
+                //arr_tg_angleDiff[iDet] ->SetPoint(iBin,iBin,angleDiffSum/nEntries);
+                //PUT BACK //arr_tg_angleDiff[iDet] ->SetPoint(iBin,(2*iBin-iDet*25-26),angleDiffSum/nEntries);
+                //LOGF(INFO, "Point written: bin %i, trkAng: %4.3f, angdiff: %f",iBin,arr_tg_angleDiff[iDet] ->GetPointX(iBin),arr_tg_angleDiff[iDet] ->GetPointY(iBin));
             }
-            */
-            arr_tg_angleDiff[iDet] ->SetPoint(iBin,vec_tp_Delta_vs_impact_circle[iDet]->GetBinCenter(iBin+212),vec_tp_Delta_vs_impact_circle[iDet]->GetBinContent(iBin+212));
+
+            //arr_tg_angleDiff[iDet] ->SetPoint(iBin,vec_tp_Delta_vs_impact_circle[iDet]->GetBinCenter(iBin+212),vec_tp_Delta_vs_impact_circle[iDet]->GetBinContent(iBin+212));
             //LOGF(INFO, "Point written: bin %i, x: %f, angdiff: %f",iBin,arr_tg_angleDiff[iDet] ->GetPointX(iBin),arr_tg_angleDiff[iDet] ->GetPointY(iBin));
 
             //minimization
+#if 0
 
             TVirtualFitter *min = TVirtualFitter::Fitter(0,2);
             min->SetFCN(Chi2_TRD_vDrift);
@@ -291,6 +304,7 @@ void CalibVDrift::process()
             LOGF(INFO, "iDet: %i, arr_vD_fit[%i]: %4.3f, arr_LA_fit[%i]: %4.3f",iDet,iDet,arr_vD_fit[iDet],iDet,arr_LA_fit[iDet]);
 
             delete min;
+#endif
 
             //i_point = i_point+1;
 
