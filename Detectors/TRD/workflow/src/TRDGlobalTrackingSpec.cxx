@@ -71,7 +71,7 @@ void TRDGlobalTracking::init(InitContext& ic)
   mTracker->SetNCandidates(mRec->GetProcessingSettings().trdNCandidates); // must be set before initialization
   mTracker->SetProcessPerTimeFrame(true);
   mTracker->SetGenerateSpacePoints(false); // set to true to force space point calculation by the TRD tracker itself
-  //mTracker->SetDoImpactAngleHistograms(true);
+  mTracker->SetDoImpactAngleHistograms(true);
 
   mRec->RegisterGPUProcessor(mTracker, false);
   mChainTracking->SetTRDGeometry(std::move(mFlatGeo));
@@ -165,6 +165,7 @@ void TRDGlobalTracking::run(ProcessingContext& pc)
   // Temporary until it is transferred to its own DPL device for calibrations
   mCalibVDrift.setAngleDiffSums(mTracker->AngleDiffSums());
   mCalibVDrift.setAngleDiffCounters(mTracker->AngleDiffCounters());
+  //mCalibVDrift.init(); //inside of function - bool condition to run only at 1st call
   mCalibVDrift.process();
 
   if (inputTracks.isTrackSourceLoaded(GTrackID::Source::ITSTPC)) {

@@ -18,7 +18,7 @@
 #include "TFile.h"
 #include "TH2F.h"
 #include "TGraphErrors.h"
-#include "TProfile.h"
+//#include "TProfile.h"
 #include "TMath.h"
 #include "TVirtualFitter.h"
 #include "Math/MinimizerOptions.h"
@@ -41,7 +41,9 @@ using namespace o2::ccdb;
 using namespace o2::trd;
 using namespace o2::trd::constants;
 
-static std::array<TProfile*, constants::MAXCHAMBER> vec_tp_Delta_vs_impact_circle; //for input hists
+//static std::array<TProfile*, constants::MAXCHAMBER> vec_tp_Delta_vs_impact_circle; //for input hists
+//static std::array<std::unique_ptr<TGraphErrors>, constants::MAXCHAMBER> arr_tg_angleDiff;
+
 static int iDet;
 
 //use fixed pre-calib parameters
@@ -138,10 +140,13 @@ void Chi2_TRD_vDrift(Int_t &, Double_t *, Double_t & sum, Double_t * par, Int_t 
     //TGraph* tg_Delta_vs_impact_single = calc_Delta_alpha(LA_use,vD_ratio_use); // old version
     //TGraph* tg_Delta_vs_impact_single = calc_Delta_alpha(LA_use,vD_ratio_use,Lorentz_angle_pre_corr); // old version
 
-    for(Int_t i_bin = 1; i_bin <= vec_tp_Delta_vs_impact_circle[iDet]->GetNbinsX(); i_bin++)
+    for(Int_t i_bin = 1; i_bin <= arr_tp_angleDiff[iDet]->GetNbinsX(); i_bin++)
     {
-        Double_t impact_angle     = vec_tp_Delta_vs_impact_circle[iDet] ->GetBinCenter(i_bin);
-        Double_t Delta_alpha      = vec_tp_Delta_vs_impact_circle[iDet] ->GetBinContent(i_bin);
+        //Double_t impact_angle     = vec_tp_Delta_vs_impact_circle[iDet] ->GetBinCenter(i_bin);
+        //Double_t Delta_alpha      = vec_tp_Delta_vs_impact_circle[iDet] ->GetBinContent(i_bin);
+
+        Double_t impact_angle     = (arr_tp_angleDiff[iDet] ->GetBinCenter(i_bin) + 90.0)*TMath::DegToRad();
+        Double_t Delta_alpha      = (arr_tp_angleDiff[iDet] ->GetBinContent(i_bin))*TMath::DegToRad();
 
         if(Delta_alpha == 0.0) continue;
         if(impact_angle < low_angle_fit) continue;
@@ -157,6 +162,20 @@ void Chi2_TRD_vDrift(Int_t &, Double_t *, Double_t & sum, Double_t * par, Int_t 
     delete tg_Delta_vs_impact_single;
 }
 //----------------------------------------------------------------------------------------
+#endif
+
+#if 1
+void CalibVDrift::init()
+{
+    /*
+    for (iDet = 0; iDet < constants::MAXCHAMBER; ++iDet)
+    {
+        if (mIsInitialized == false) arr_tp_angleDiff[iDet] = std::make_unique<TProfile>(Form("arr_tp_angleDiff_%d",iDet),Form("arr_tp_angleDiff_%d",iDet),constants::NBINSANGLEDIFF,-25.0,25.0); // xy distribution of TRD space points
+        //LOGF(INFO, "mIsInitialized: %B, arr_tp_angleDiff_%i",mIsInitialized,iDet);
+    }
+    mIsInitialized = true;
+    */
+}
 #endif
 
 void CalibVDrift::process()
@@ -227,8 +246,8 @@ void CalibVDrift::process()
 
     //std::array<TProfile*, constants::MAXCHAMBER> vec_tp_Delta_vs_impact_circle; //for input hists
 
-    std::array<double, constants::MAXCHAMBER> arr_LA_fit;
-    std::array<double, constants::MAXCHAMBER> arr_vD_fit;
+    //std::array<double, constants::MAXCHAMBER> arr_LA_fit;
+    //std::array<double, constants::MAXCHAMBER> arr_vD_fit;
 
     //auto input_data = TFile::Open("/home/ceres/berdnikova/TRD-Run3-Calibration/Data/TRD_Calib_on_trkl.root");
 
@@ -237,16 +256,22 @@ void CalibVDrift::process()
     //    vec_tp_Delta_vs_impact_circle[iDet] = (TProfile*)input_data->Get(Form("Delta_impact_circle/vec_th1d_Delta_vs_impact_circle_%d",iDet));
     //}
 
-    std::array<std::unique_ptr<TGraphErrors>, constants::MAXCHAMBER> arr_tg_angleDiff;
-
     for (iDet = 0; iDet < constants::MAXCHAMBER; ++iDet) {
 
-        arr_tg_angleDiff[iDet] = std::make_unique<TGraphErrors>(constants::NBINSANGLEDIFF); // xy distribution of TRD space points
+        //arr_tp_angleDiff[iDet] = std::make_unique<TProfile>(constants::NBINSANGLEDIFF,-25.0,25.0); // xy distribution of TRD space points //moved to init
 
+        LOGF(INFO, "mIsInitialized: %B ",mIsInitialized);
+
+        //if (mIsInitialized == false) arr_tp_angleDiff[iDet] = std::make_unique<TProfile>(Form("arr_tp_angleDiff_%d",iDet),Form("arr_tp_angleDiff_%d",iDet),constants::NBINSANGLEDIFF,-25.0,25.0); // xy distribution of TRD space points
+
+        if (!arr_tp_angleDiff[iDet]) {arr_tp_angleDiff[iDet] = std::make_unique<TProfile>(Form("arr_tp_angleDiff_%d",iDet),Form("arr_tp_angleDiff_%d",iDet),constants::NBINSANGLEDIFF,-25.0,25.0); // xy distribution of TRD space points
+            if (iDet==0) LOGF(INFO, "initializing hist");  }
         //add array with RMSs - on the fly
         //second array with counters?
 
         //tracklets are calibrated or not?
+
+        //int iPoint = 0;
 
         for (int iBin = 0; iBin < constants::NBINSANGLEDIFF; ++iBin) { // note: iBin = constants::NBINSANGLEDIFF - 1 is under-/overflow bin
 
@@ -258,15 +283,26 @@ void CalibVDrift::process()
             {
                 LOGF(INFO, "Found %i entrie(s) in chamber %i, bin %i. Average angular deviation: %f", nEntries, iDet, iBin, angleDiffSum / nEntries);
                 //arr_tg_angleDiff[iDet] ->SetPoint(iBin,iBin,angleDiffSum/nEntries);
-                //PUT BACK //arr_tg_angleDiff[iDet] ->SetPoint(iBin,(2*iBin-iDet*25-26),angleDiffSum/nEntries);
-                //LOGF(INFO, "Point written: bin %i, trkAng: %4.3f, angdiff: %f",iBin,arr_tg_angleDiff[iDet] ->GetPointX(iBin),arr_tg_angleDiff[iDet] ->GetPointY(iBin));
+                //PUT BACK
+                //arr_tp_angleDiff[iDet] ->SetPoint(iPoint,(2*iBin-25),angleDiffSum/nEntries); //double check bins
+
+                LOGF(INFO, "Fill: x = %f, y =  %f, w =  %f",(double)(2*iBin-25),angleDiffSum/nEntries,(double)nEntries);
+                arr_tp_angleDiff[iDet] ->Fill((double)(2*iBin-25),(double)angleDiffSum/nEntries,(double)nEntries); //double check bins
+                //arr_tp_angleDiff[iDet] ->Fill(iBin,2); //test
+
+                //LOGF(INFO, "Fill: x = %f, y =  %f, w =  %f",(2.0*(double)iBin-25.0),angleDiffSum/nEntries,nEntries);
+                //arr_tp_angleDiff[iDet] ->Fill((2.0*(double)iBin-25.0),angleDiffSum/nEntries,nEntries); //double check bins
+
+
+                //iPoint++;
+                LOGF(INFO, "Point written: bin %i, iDet: %i, trkAng: %4.3f, angdiff: %f",iBin,iDet,arr_tp_angleDiff[iDet] ->GetBinCenter(iBin),arr_tp_angleDiff[iDet] ->GetBinContent(iBin));
             }
 
             //arr_tg_angleDiff[iDet] ->SetPoint(iBin,vec_tp_Delta_vs_impact_circle[iDet]->GetBinCenter(iBin+212),vec_tp_Delta_vs_impact_circle[iDet]->GetBinContent(iBin+212));
             //LOGF(INFO, "Point written: bin %i, x: %f, angdiff: %f",iBin,arr_tg_angleDiff[iDet] ->GetPointX(iBin),arr_tg_angleDiff[iDet] ->GetPointY(iBin));
 
             //minimization
-#if 0
+#if 1
 
             TVirtualFitter *min = TVirtualFitter::Fitter(0,2);
             min->SetFCN(Chi2_TRD_vDrift);
@@ -301,7 +337,7 @@ void CalibVDrift::process()
             arr_LA_fit[iDet] = parFit[0];
             arr_vD_fit[iDet] = parFit[1];
 
-            LOGF(INFO, "iDet: %i, arr_vD_fit[%i]: %4.3f, arr_LA_fit[%i]: %4.3f",iDet,iDet,arr_vD_fit[iDet],iDet,arr_LA_fit[iDet]);
+            LOGF(INFO, "iDet: %i, arr_vD_fit[%i]: %4.3f, arr_LA_fit[%i]: %4.3f",iDet,iDet,arr_vD_fit[iDet],iDet,arr_LA_fit[iDet]*TMath::RadToDeg());
 
             delete min;
 #endif
@@ -312,14 +348,27 @@ void CalibVDrift::process()
         }
     }
 
+    mIsInitialized = true;
+
+    TH1D* th_vD_out = new TH1D("vD","vD",540,1,540);
+    TH1D* th_LA_out = new TH1D("LA","LA",540,1,540);
+
+    for (int iDet = 0; iDet < constants::MAXCHAMBER; ++iDet)
+    {
+        th_vD_out->Fill(iDet+1,arr_vD_fit[iDet]);
+        th_LA_out->Fill(iDet+1,arr_LA_fit[iDet]);
+    }
+
     auto fOut = TFile::Open("trdcalibdummy.root", "recreate");
     fOut->cd();
 
     for (int iDet = 0; iDet < constants::MAXCHAMBER; ++iDet)
     {
-        arr_tg_angleDiff[iDet] ->Write();
-        arr_tg_angleDiff[iDet].reset();
+        arr_tp_angleDiff[iDet] ->Write();
+        //arr_tp_angleDiff[iDet].reset();
     }
+    th_vD_out ->Write();
+    th_LA_out ->Write();
 
     fOut->Close();
 

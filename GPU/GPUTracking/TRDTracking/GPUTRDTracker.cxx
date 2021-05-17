@@ -725,6 +725,11 @@ GPUd() int GPUTRDTracker_t<TRDTRK, PROP>::FillImpactAngleHistograms(PROP* prop, 
       idxOffsetAngle = mNAngleHistogramBins;
     }
 
+    if ((idxOffsetDet + idxOffsetAngle) >= (kNChambers * (mNAngleHistogramBins + 1)) || (idxOffsetDet + idxOffsetAngle) < 0) {
+      GPUError("Index error when filling angular histograms");
+      return 4;
+    }
+
     mAngleDiffSums[idxOffsetDet + idxOffsetAngle] += trkltAngle - trkAngle;
     mAngleDiffCounters[idxOffsetDet + idxOffsetAngle]++;
 
@@ -750,13 +755,13 @@ GPUd() int GPUTRDTracker_t<TRDTRK, PROP>::PropagateToLayerAndUpdate(PROP* prop, 
 
   if (trackletSector != GetSector(prop->getAlpha())) {
     if (!prop->rotate(GetAlphaOfSector(trackletSector))) {
-      GPUInfo("Track could not be rotated in tracklet coordinate system");
+      //GPUInfo("Track could not be rotated in tracklet coordinate system");
       return 1;
     }
   }
 
   if (!prop->propagateToX(spacePoints[trackletID].getX(), .8f, 2.f)) {
-    GPUInfo("Track propagation failed in layer %i (pt=%f, xTrk=%f, xToGo=%f)", iLayer, trkWork->getPt(), trkWork->getX(), spacePoints[trackletID].getX());
+    //GPUInfo("Track propagation failed in layer %i (pt=%f, xTrk=%f, xToGo=%f)", iLayer, trkWork->getPt(), trkWork->getX(), spacePoints[trackletID].getX());
     return 2;
   }
 
@@ -779,7 +784,7 @@ GPUd() int GPUTRDTracker_t<TRDTRK, PROP>::PropagateToLayerAndUpdate(PROP* prop, 
   RecalcTrkltCov(tilt, trkWork->getSnp(), pad->GetRowSize(GetConstantMem()->ioPtrs.trdTracklets[trackletID].GetZbin()), trkltCovUp);
 
   if (!prop->update(trkltPosUp, trkltCovUp)) {
-    GPUWarning("Failed to update track with space point in layer %i", iLayer);
+    //GPUWarning("Failed to update track with space point in layer %i", iLayer);
     return 3;
   }
   return 0;

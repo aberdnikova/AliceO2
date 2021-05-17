@@ -15,6 +15,8 @@
 /// \author Ole Schmidt, ole.schmidt@cern.ch
 
 #include "DataFormatsTRD/Constants.h"
+#include "TProfile.h"
+#include "TGraph.h"
 #include <array>
 
 namespace o2
@@ -27,7 +29,15 @@ namespace trd
 /// This class is used to determine chamber-wise vDrift values
 ///
 /// origin: TRD
-/// \author Ole Schmidt, ole.schmidt@cern.ch
+    /// \author Ole Schmidt, ole.schmidt@cern.ch
+
+    static std::array<std::unique_ptr<TProfile>, constants::MAXCHAMBER> arr_tp_angleDiff;
+    //static std::array<TProfile*, constants::MAXCHAMBER> arr_tp_angleDiff;
+
+static std::array<double, constants::MAXCHAMBER> arr_LA_fit;
+static std::array<double, constants::MAXCHAMBER> arr_vD_fit;
+
+  //bool mIsInitialized{false};
 
 class CalibVDrift
 {
@@ -54,12 +64,31 @@ class CalibVDrift
     }
   }
 
+  void init();
+
   /// main processing function
   void process();
+
+  //TGraph* calc_Delta_alpha(Double_t vD_fit, Double_t Lorentz_angle_fit, Double_t vD_pre_corr, Double_t Lorentz_angle_pre_corr);
+  //void Chi2_TRD_vDrift(Int_t &, Double_t *, Double_t & sum, Double_t * par, Int_t );
 
  private:
   std::array<float, constants::MAXCHAMBER * constants::NBINSANGLEDIFF> mAngleDiffSums{};     ///< input TRD track to tracklet angular difference sums per bin
   std::array<short, constants::MAXCHAMBER * constants::NBINSANGLEDIFF> mAngleDiffCounters{}; ///< input bin counters
+
+ //public:
+
+  //static std::array<std::unique_ptr<TProfile>, constants::MAXCHAMBER> arr_tp_angleDiff;
+
+  //static std::array<double, constants::MAXCHAMBER> arr_LA_fit;
+  //static std::array<double, constants::MAXCHAMBER> arr_vD_fit;
+
+  bool mIsInitialized{false};
+
+  //short nEntries;
+  //float angleDiffSum;
+
+  //define tgraphs
 };
 
 } // namespace trd
