@@ -21,7 +21,7 @@ std::string NameConf::buildFileName(const std::string_view prefix, const std::st
                                     const std::string_view extension, const std::string_view optDir)
 {
   if (o2::utils::Str::pathIsDirectory(prefix)) { // if path is directory, just add to default name, ignoring optional directory optDir argument
-    return o2::utils::Str::concat_string(prefix, "/", defPrefix, delimiter, defName, extension);
+    return o2::utils::Str::concat_string(prefix, "/", defPrefix, delimiter, defName, '.', extension);
   } else if (!prefix.empty() && o2::utils::Str::pathExists(prefix)) { // explicit file path is provided, use it directly
     return std::string(prefix);
   }
@@ -40,6 +40,12 @@ std::string NameConf::buildFileName(const std::string_view prefix, const std::st
 std::string NameConf::getGeomFileName(const std::string_view prefix)
 {
   return buildFileName(prefix, "_", STANDARDSIMPREFIX, GEOM_FILE_STRING, ROOT_EXT_STRING, Instance().mDirGeom);
+}
+
+// Filename to store general run parameters (GRP)
+std::string NameConf::getCollisionContextFileName(const std::string_view prefix)
+{
+  return buildFileName(prefix, "", "", COLLISIONCONTEXT, ROOT_EXT_STRING, Instance().mDirCollContext);
 }
 
 // Filename to store general run parameters (GRP)

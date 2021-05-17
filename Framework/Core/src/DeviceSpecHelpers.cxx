@@ -340,6 +340,7 @@ void DeviceSpecHelpers::processOutEdgeActions(std::vector<DeviceSpec>& devices,
     device.inputTimesliceId = edge.producerTimeIndex;
     device.maxInputTimeslices = processor.maxInputTimeslices;
     device.resource = {acceptedOffer};
+    device.labels = processor.labels;
     devices.push_back(device);
     return devices.size() - 1;
   };
@@ -551,6 +552,7 @@ void DeviceSpecHelpers::processInEdgeActions(std::vector<DeviceSpec>& devices,
     device.inputTimesliceId = edge.timeIndex;
     device.maxInputTimeslices = processor.maxInputTimeslices;
     device.resource = {acceptedOffer};
+    device.labels = processor.labels;
 
     // FIXME: maybe I should use an std::map in the end
     //        but this is really not performance critical
@@ -737,6 +739,7 @@ void DeviceSpecHelpers::dataProcessorSpecs2DeviceSpecs(const WorkflowSpec& workf
                                                        std::vector<ChannelConfigurationPolicy> const& channelPolicies,
                                                        std::vector<CompletionPolicy> const& completionPolicies,
                                                        std::vector<DispatchPolicy> const& dispatchPolicies,
+                                                       std::vector<ResourcePolicy> const& resourcePolicies,
                                                        std::vector<DeviceSpec>& devices,
                                                        ResourceManager& resourceManager,
                                                        std::string const& uniqueWorkflowId,
@@ -815,6 +818,17 @@ void DeviceSpecHelpers::dataProcessorSpecs2DeviceSpecs(const WorkflowSpec& workf
         device.dispatchPolicy = policy;
         break;
       }
+    }
+    bool hasPolicy = false;
+    for (auto& policy : resourcePolicies) {
+      if (policy.matcher(device) == true) {
+        device.resourcePolicy = policy;
+        hasPolicy = true;
+        break;
+      }
+    }
+    if (hasPolicy == false) {
+      throw runtime_error_f("Unable to find a resource policy for %s", device.id.c_str());
     }
   }
 

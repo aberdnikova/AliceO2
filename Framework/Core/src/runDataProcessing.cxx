@@ -410,6 +410,8 @@ void spawnRemoteDevice(std::string const& forwardedStdin,
   info.dataRelayerViewIndex = Metric2DViewIndex{"data_relayer", 0, 0, {}};
   info.variablesViewIndex = Metric2DViewIndex{"matcher_variables", 0, 0, {}};
   info.queriesViewIndex = Metric2DViewIndex{"data_queries", 0, 0, {}};
+  // FIXME: use uv_now.
+  info.lastSignal = uv_hrtime() - 10000000;
 
   deviceInfos.emplace_back(info);
   // Let's add also metrics information for the given device
@@ -760,6 +762,7 @@ void spawnDevice(std::string const& forwardedStdin,
   info.variablesViewIndex = Metric2DViewIndex{"matcher_variables", 0, 0, {}};
   info.queriesViewIndex = Metric2DViewIndex{"data_queries", 0, 0, {}};
   info.tracyPort = driverInfo.tracyPort;
+  info.lastSignal = uv_hrtime() - 10000000;
 
   deviceInfos.emplace_back(info);
   // Let's add also metrics information for the given device
@@ -1358,6 +1361,7 @@ int runStateMachine(DataProcessorSpecs const& workflow,
                                                             driverInfo.channelPolicies,
                                                             driverInfo.completionPolicies,
                                                             driverInfo.dispatchPolicies,
+                                                            driverInfo.resourcePolicies,
                                                             runningWorkflow.devices,
                                                             *resourceManager,
                                                             driverInfo.uniqueWorkflowId,
@@ -2028,6 +2032,7 @@ int doMain(int argc, char** argv, o2::framework::WorkflowSpec const& workflow,
            std::vector<ChannelConfigurationPolicy> const& channelPolicies,
            std::vector<CompletionPolicy> const& completionPolicies,
            std::vector<DispatchPolicy> const& dispatchPolicies,
+           std::vector<ResourcePolicy> const& resourcePolicies,
            std::vector<ConfigParamSpec> const& currentWorkflowOptions,
            o2::framework::ConfigContext& configContext)
 {
@@ -2269,6 +2274,7 @@ int doMain(int argc, char** argv, o2::framework::WorkflowSpec const& workflow,
   driverInfo.channelPolicies = channelPolicies;
   driverInfo.completionPolicies = completionPolicies;
   driverInfo.dispatchPolicies = dispatchPolicies;
+  driverInfo.resourcePolicies = resourcePolicies;
   driverInfo.argc = argc;
   driverInfo.argv = argv;
   driverInfo.batch = varmap["no-batch"].defaulted() ? varmap["batch"].as<bool>() : false;

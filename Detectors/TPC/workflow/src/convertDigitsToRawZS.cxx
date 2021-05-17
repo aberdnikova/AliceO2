@@ -17,17 +17,15 @@
 #include <memory>
 #include <vector>
 #include <fmt/format.h>
-
+#include <filesystem>
 #include "TFile.h"
 #include "TTree.h"
 #include "TROOT.h"
-#include "TSystem.h"
 
 #include "GPUO2Interface.h"
 #include "GPUReconstructionConvert.h"
 #include "GPUHostDataTypes.h"
 #include "GPUParam.h"
-#include "GPURawData.h"
 
 #include "Framework/Logger.h"
 #include "DetectorsRaw/RawFileWriter.h"
@@ -43,6 +41,7 @@
 #include "CommonUtils/ConfigurableParam.h"
 #include "DataFormatsParameters/GRPObject.h"
 #include "DetectorsCommonDataFormats/NameConf.h"
+#include "DetectorsRaw/RDHUtils.h"
 
 namespace bpo = boost::program_options;
 
@@ -95,14 +94,16 @@ void convertDigitsToZSfinal(std::string_view digitsFile, std::string_view output
     outDir += '/';
   }
 
-  if (gSystem->AccessPathName(outDir.data())) {
+  // if needed, create output directory
+  if (!std::filesystem::exists(outDir)) {
     if (createParentDir) {
-      if (gSystem->mkdir(outDir.data(), kTRUE)) {
-        LOGP(error, "could not create output directory {}", outDir.data());
-        exit(1);
+      if (!std::filesystem::create_directories(outDir)) {
+        LOG(FATAL) << "could not create output directory " << outDir;
+      } else {
+        LOG(INFO) << "created output directory " << outDir;
       }
     } else {
-      LOGP(error, "Requested output directory '{}' does not exists, consider removing '-n'", outDir.data());
+      LOGP(error, "Requested output directory '{}' does not exists, consider removing '-n'", outDir);
       exit(1);
     }
   }
@@ -138,6 +139,7 @@ void convertDigitsToZSfinal(std::string_view digitsFile, std::string_view output
   if (fileFor != "link") { // in case >1 link goes to the file, we must cache to preserve the TFs ordering
     writer.useCaching();
   }
+  writer.doLazinessCheck(false); // LazinessCheck is not thread-safe
 
   // ===| set up branch addresses |=============================================
   std::vector<Digit>* vDigitsPerSectorCollection[Sector::MAXSECTOR] = {nullptr}; // container that keeps Digits per sector
@@ -226,7 +228,7 @@ int main(int argc, char** argv)
     add_option("file-for,f", bpo::value<std::string>()->default_value("sector"), "single file per: link,sector,all");
     add_option("stop-page,p", bpo::value<bool>()->default_value(false)->implicit_value(true), "HBF stop on separate CRU page");
     add_option("no-padding", bpo::value<bool>()->default_value(false)->implicit_value(true), "Don't pad pages to 8kb");
-    uint32_t defRDH = o2::raw::RDHUtils::getVersion<o2::gpu::RAWDataHeaderGPU>();
+    uint32_t defRDH = o2::raw::RDHUtils::getVersion<o2::header::RAWDataHeader>();
     add_option("hbfutils-config,u", bpo::value<std::string>()->default_value(std::string(o2::base::NameConf::DIGITIZATIONCONFIGFILE)), "config file for HBFUtils (or none)");
     add_option("rdh-version,r", bpo::value<uint32_t>()->default_value(defRDH), "RDH version to use");
     add_option("configKeyValues", bpo::value<std::string>()->default_value(""), "comma-separated configKeyValues");

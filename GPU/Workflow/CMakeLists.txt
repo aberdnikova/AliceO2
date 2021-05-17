@@ -49,10 +49,14 @@ if(ALIGPU_BUILD_TYPE STREQUAL "O2"
           TARGETVARNAME targetName
           SOURCES src/O2GPUDPLDisplay.cxx
           PUBLIC_LINK_LIBRARIES O2::GPUO2Interface
+                                O2::GPUWorkflowHelper
                                 O2::DataFormatsGlobalTracking
                                 O2::TPCFastTransformation
                                 O2::TRDBase
+                                O2::TOFBase
                                 O2::TPCReconstruction
                                 O2::GlobalTrackingWorkflowHelpers)
   target_include_directories(${targetName} PUBLIC "include")
 endif()
+
+add_subdirectory(helper)
