@@ -86,11 +86,11 @@ DataProcessorSpec getTRDVdAndExBCalibSpec()
   using clbUtils = o2::calibration::Utils;
 
   std::vector<OutputSpec> outputs;
-  outputs.emplace_back(ConcreteDataTypeMatcher{clbUtils::gDataOriginCLB, clbUtils::gDataDescriptionCLBPayload});
-  outputs.emplace_back(ConcreteDataTypeMatcher{clbUtils::gDataOriginCLB, clbUtils::gDataDescriptionCLBInfo});
+  //outputs.emplace_back(ConcreteDataTypeMatcher{clbUtils::gDataOriginCLB, clbUtils::gDataDescriptionCLBPayload});
+  //outputs.emplace_back(ConcreteDataTypeMatcher{clbUtils::gDataOriginCLB, clbUtils::gDataDescriptionCLBInfo});
   return DataProcessorSpec{
     "calib-vdexb-calibration",
-    Inputs{{"input", "TRD", "CALIBDATA"}},
+    Inputs{{"input", "TRD", "ANGRESHISTS"}},
     outputs,
     AlgorithmSpec{adaptFromTask<device>()},
     Options{
