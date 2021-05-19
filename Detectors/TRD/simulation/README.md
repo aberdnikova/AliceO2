@@ -32,7 +32,7 @@ o2-trd-trap2raw
 ```
 This will convert the tracklets and digits in the current directory to a series of files containing the raw data as it would appear coming out of the cru.
 There are multiple options :
-- -d [ --input-file-digits ] default of trddigits.root  
+- -d [ --input-file-digits ] default of trddigits.root
                                         input Trapsim digits file, empty string to have no digits.
 - -t [ --input-file-tracklets ] default of trdtracklets.root
                                         input Trapsim tracklets file

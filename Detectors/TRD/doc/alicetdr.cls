@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% customization for the ALICE Technical Design and Physics Performance Reports 
+% customization for the ALICE Technical Design and Physics Performance Reports
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\fileversion{8}
@@ -62,7 +62,7 @@
        \end{minipage}%
   % ]%
 }
- 
+
 \def\@makeschapterhead#1{%
  %  \twocolumn[%
 \noindent\begin{minipage}{\textwidth}%
@@ -74,9 +74,9 @@
        \end{minipage}%
  %  ]%
 }
- 
+
 \def\chapter{\thispagestyle{plain}\secdef\@chapter\@schapter}
- 
+
 \def\@chapter[#1]#2{\ifnum \c@secnumdepth >\m@ne
         \refstepcounter{chapter}%
         \typeout{\@chapapp\space\thechapter.}%
@@ -104,7 +104,7 @@
 }
 
 \def\@schapter#1{\@makeschapterhead{#1}}
- 
+
 \def\section{\@startsection {section}{1}{\z@}{-3.5ex plus-1ex minus
     -.2ex}{2.3ex plus.2ex}{\reset@font\Large\raggedright\bf}}
 \def\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex plus-1ex
@@ -118,7 +118,7 @@
 \def\subparagraph{\@startsection
      {subparagraph}{4}{\parindent}{3.25ex plus1ex minus
      .2ex}{-1em}{\reset@font\normalsize\bf}}
- 
+
 \setcounter{secnumdepth}{3}
 % allows 3 levels of sections, e.g. '5.3.2 The Blablabla'
 % sequence: \section \subsection \subsubsection \paragraph
@@ -163,7 +163,7 @@
     \def\newblock{\hskip .11em plus.33em minus.07em}%
     \sloppy\clubpenalty4000\widowpenalty4000
     \sfcode`\.=1000\relax}
- 
+
 
 \renewcommand*\l@chapter[2]{%
    %mg\addpenalty{-\@highpenalty}%
@@ -186,7 +186,7 @@
 \renewcommand{\l@subsubsection}{\@dottedtocline{3}{2.5em}{4.0em}}
 \renewcommand{\l@paragraph}{\@dottedtocline{4}{3.5em}{4.5em}}
 \renewcommand{\l@subparagraph}{\@dottedtocline{5}{4.5em}{5.0em}}
- 
+
 % adjust spacing between rows in tables
 \renewcommand{\arraystretch}{1.05}
 
@@ -194,6 +194,6 @@
 %\chapter*{Table of Contents}\pagestyle{empty}\@starttoc{toc}}
 
 \endinput
- 
+
 
 
