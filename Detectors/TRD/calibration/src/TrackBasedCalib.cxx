@@ -112,7 +112,9 @@ void TrackBasedCalib::calculateAngResHistos(const o2::globaltracking::RecoContai
       float trkltAngle = o2::math_utils::atan(mTrackletsCalib[trkWork.getTrackletIndex(iLayer)].getDy() / Geometry::cdrHght()) * TMath::DegToRad();
       float angleDeviation = trkltAngle - trkAngle;
       mAngResHistos.addEntry(angleDeviation, trkAngle, mTrackletsRaw[trkWork.getTrackletIndex(iLayer)].getDetector());
+      LOGF(INFO, "Check what we wrote: angleDeviation = %4.3f, trkAngle = %4.3f ", angleDeviation, trkAngle);
       ++nAngularResidualsCollected;
+
     }
 
     // here we can count the number of successfully processed tracks

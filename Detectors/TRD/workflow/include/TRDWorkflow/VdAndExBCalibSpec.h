@@ -38,7 +38,8 @@ class VdAndExBCalibDevice : public o2::framework::Task
  public:
   void init(o2::framework::InitContext& ic) final
   {
-    int minEnt = std::max(50'000, ic.options().get<int>("min-entries"));
+      //int minEnt = std::max(50'000, ic.options().get<int>("min-entries"));
+      int minEnt = 10;;
     int slotL = ic.options().get<int>("tf-per-slot");
     int delay = ic.options().get<int>("max-delay");
     mCalibrator = std::make_unique<o2::trd::CalibratorVdExB>(minEnt);
