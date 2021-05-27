@@ -56,4 +56,9 @@ void AngularResidHistos::merge(const AngularResidHistos* prev)
 void AngularResidHistos::print()
 {
   LOG(INFO) << "There are " << mNEntriesTotal << " entries in the container (excluding under-/overflow bin)";
+  for (int i = 0; i < MAXCHAMBER * (NBINSANGLEDIFF + 1); ++i) {
+    if (mNEntriesPerBin[i] != 0) {
+      LOGF(INFO, "Global bin %i has %i entries. Average angular residual: %f", i, mNEntriesPerBin[i], mHistogramEntries[i]);
+    }
+  }
 }

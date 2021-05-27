@@ -108,8 +108,8 @@ void TrackBasedCalib::calculateAngResHistos(const o2::globaltracking::RecoContai
         break;
       }
 
-      float trkAngle = o2::math_utils::asin(trkWork.getSnp()) * TMath::DegToRad();
-      float trkltAngle = o2::math_utils::atan(mTrackletsCalib[trkWork.getTrackletIndex(iLayer)].getDy() / Geometry::cdrHght()) * TMath::DegToRad();
+      float trkAngle = o2::math_utils::asin(trkWork.getSnp()) * TMath::RadToDeg();
+      float trkltAngle = o2::math_utils::atan(mTrackletsCalib[trkWork.getTrackletIndex(iLayer)].getDy() / Geometry::cdrHght()) * TMath::RadToDeg();
       float angleDeviation = trkltAngle - trkAngle;
       mAngResHistos.addEntry(angleDeviation, trkAngle, mTrackletsRaw[trkWork.getTrackletIndex(iLayer)].getDetector());
       ++nAngularResidualsCollected;
@@ -119,6 +119,9 @@ void TrackBasedCalib::calculateAngResHistos(const o2::globaltracking::RecoContai
     ++nTracksSuccess;
   } // end of track loop
   LOGF(INFO, "Successfully processed %i tracks and collected %i angular residuals", nTracksSuccess, nAngularResidualsCollected);
+
+  mAngResHistos.print();
+
 }
 
 bool TrackBasedCalib::propagateAndUpdate(TrackTRD& trk, int iLayer, bool doUpdate) const

@@ -37,9 +37,11 @@ There are multiple options :
 - -t [ --input-file-tracklets ] default of trdtracklets.root
                                         input Trapsim tracklets file
 -   -l [ --fileper ] how to distrbute the data into raw files.
-  - all : 1 raw file
-  - halfcru : 1 file per cru end point, so 2 files per cru.
-  - cru : one file per cru
+
+    - all : 1 raw file
+    - halfcru : 1 file per cru end point, so 2 files per cru.
+    - cru : one file per cru
+
     - sm: one file per supermodule
 -  -o [ --output-dir ]  output directory for raw data defaults to local directory
 -  -x [ --trackletHCHeader ] include tracklet half chamber header (for run3, and not in run2)
