@@ -28,7 +28,19 @@ void CalibratorVdExB::initOutput()
 void CalibratorVdExB::finalizeSlot(Slot& slot)
 {
   // do actual calibration for the data provided in the given slot
-  // TODO!
+    // TODO!
+
+    LOG(INFO) << "WE ARE IN finalizeSlot";
+
+    o2::trd::AngularResidHistos* residhistos = slot.getContainer();
+
+    for (int index = 0; index < residhistos->getNEntries(); index++)
+    {
+        float angleDiff = residhistos->getHistogramEntry(index);
+        int count = residhistos->getBinCount(index);
+        LOGF(INFO, "Check what we read: angleDiff = %4.3f, count = %d ", angleDiff, count);
+    }
+
 }
 
 Slot& CalibratorVdExB::emplaceNewSlot(bool front, uint64_t tStart, uint64_t tEnd)
