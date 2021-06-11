@@ -38,7 +38,8 @@ class VdAndExBCalibDevice : public o2::framework::Task
  public:
   void init(o2::framework::InitContext& ic) final
   {
-    int minEnt = std::max(50'000, ic.options().get<int>("min-entries"));
+      //int minEnt = std::max(50'000, ic.options().get<int>("min-entries"));
+      int minEnt = 103800;
     int slotL = ic.options().get<int>("tf-per-slot");
     int delay = ic.options().get<int>("max-delay");
     mCalibrator = std::make_unique<o2::trd::CalibratorVdExB>(minEnt);
@@ -71,7 +72,9 @@ class VdAndExBCalibDevice : public o2::framework::Task
   {
     // See LHCClockCalibratorSpec.h
     // Before this can be implemented the output CCDB objects need to be defined
-    // and added to CalibratorVdExB
+      // and added to CalibratorVdExB
+
+      mCalibrator->initOutput(); 
   }
 };
 
@@ -96,7 +99,7 @@ DataProcessorSpec getTRDVdAndExBCalibSpec()
     Options{
       {"tf-per-slot", VariantType::Int, 5, {"number of TFs per calibration time slot"}},
       {"max-delay", VariantType::Int, 90'000, {"number of slots in past to consider"}}, // 15 minutes delay, 10ms TF
-      {"min-entries", VariantType::Int, 500, {"minimum number of entries to fit single time slot"}}}};
+      {"min-entries", VariantType::Int, 103800, {"minimum number of entries to fit single time slot"}}}};
 }
 
 } // namespace framework
