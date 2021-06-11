@@ -69,7 +69,7 @@ inline auto getRecoInputContainer(o2::framework::ProcessingContext& pc, o2::gpu:
   for (unsigned int iEv = 0; iEv < retVal->mNTriggerRecords; ++iEv) {
     const auto& trg = retVal->mTriggerRecords[iEv];
     retVal->trdTriggerIndices.push_back(trg.getFirstTracklet());
-    auto evTime = trg.getBCData().differenceInBC(inputTracks->startIR) * o2::constants::lhc::LHCBunchSpacingNS; // event time in ns
+    auto evTime = trg.getBCData().toLong() * o2::constants::lhc::LHCBunchSpacingNS; // event time in ns
     retVal->trdTriggerTimes.push_back(evTime * 1e-3);                                                           // event time in us
   }
 

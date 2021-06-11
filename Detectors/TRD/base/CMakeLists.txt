@@ -55,6 +55,7 @@ o2_target_root_dictionary(TRDBase
                                   include/TRDBase/PadParameters.h
                                   include/TRDBase/PadCalibrations.h
                                   include/TRDBase/ChamberCalibrations.h
+                                  include/TRDBase/CalVdriftExB.h
                                   include/TRDBase/PadStatus.h
                                   include/TRDBase/LocalVDrift.h
                                   include/TRDBase/LocalT0.h

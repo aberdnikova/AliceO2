@@ -19,6 +19,7 @@
 #include "DetectorsCalibration/TimeSlot.h"
 #include "DataFormatsTRD/Constants.h"
 #include "DataFormatsTRD/AngularResidHistos.h"
+#include "TProfile.h"
 
 #include "Rtypes.h"
 
@@ -27,32 +28,36 @@
 
 namespace o2
 {
-namespace trd
-{
+    namespace trd
+    {
 
-class CalibratorVdExB final : public o2::calibration::TimeSlotCalibration<o2::trd::AngularResidHistos, o2::trd::AngularResidHistos>
-{
-  using Slot = o2::calibration::TimeSlot<o2::trd::AngularResidHistos>;
+        static std::array<double, constants::MAXCHAMBER> arr_LA_fit;
+        static std::array<double, constants::MAXCHAMBER> arr_vD_fit;
 
- public:
-     CalibratorVdExB(size_t nMin = 40'000) : mMinEntries(nMin) {}
-     //CalibratorVdExB(size_t nMin = 1) : mMinEntries(nMin) {}
-  ~CalibratorVdExB() final = default;
+        class CalibratorVdExB final : public o2::calibration::TimeSlotCalibration<o2::trd::AngularResidHistos, o2::trd::AngularResidHistos>
+        {
+            using Slot = o2::calibration::TimeSlot<o2::trd::AngularResidHistos>;
 
-  //bool hasEnoughData(const Slot& slot) const final { return slot.getContainer()->getNEntries() >= mMinEntries; }
-  bool hasEnoughData(const Slot& slot) const final { return slot.getContainer()->getNEntries() >= 1; }
-  void initOutput() final;
-  void finalizeSlot(Slot& slot) final;
-  Slot& emplaceNewSlot(bool front, uint64_t tStart, uint64_t tEnd) final;
+            public:
+                //CalibratorVdExB(size_t nMin = 40'000) : mMinEntries(nMin) {}
+                CalibratorVdExB(size_t nMin = 103800) : mMinEntries(nMin) {}
+                ~CalibratorVdExB() final = default;
 
-  // TODO add calibration objects (vDrift and ExB values for each chamber) to this class and implement calibration in finalizeSlot()
+                //bool hasEnoughData(const Slot& slot) const final { return slot.getContainer()->getNEntries() >= mMinEntries; }
+                bool hasEnoughData(const Slot& slot) const final { return slot.getContainer()->getNEntries() >= 2000; }
+                void initOutput() final;
+                void finalizeSlot(Slot& slot) final;
+                Slot& emplaceNewSlot(bool front, uint64_t tStart, uint64_t tEnd) final;
 
- private:
-  size_t mMinEntries; ///< minimum total number of angular deviations (on average ~3 entries per bin for each TRD chamber)
-  ClassDefOverride(CalibratorVdExB, 1);
-};
+                // TODO add calibration objects (vDrift and ExB values for each chamber) to this class and implement calibration in finalizeSlot()
 
-} // namespace trd
+                private:
+                    size_t mMinEntries; ///< minimum total number of angular deviations (on average ~3 entries per bin for each TRD chamber)
+
+                    ClassDefOverride(CalibratorVdExB, 1);
+        };
+
+    } // namespace trd
 } // namespace o2
 
 #endif // O2_TRD_CALIBRATORVDEXB_H
