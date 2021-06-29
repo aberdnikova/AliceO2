@@ -170,7 +170,8 @@ void CalibratorVdExB::initOutput()
   ccdb.init("http://ccdb-test.cern.ch:8080"); // or http://localhost:8080 for a local installation
 
   CalVdriftExB* o2CalVdriftExB = new o2::trd::CalVdriftExB();
-  for (Int_t i_det = 0; i_det < 540; i_det++) {
+  for(Int_t i_det = 0; i_det < 540; i_det++)
+  {
     o2CalVdriftExB->setVDrift(i_det, arr_vD_fit[i_det]);
     o2CalVdriftExB->setExB(i_det, arr_LA_fit[i_det]);
   }
